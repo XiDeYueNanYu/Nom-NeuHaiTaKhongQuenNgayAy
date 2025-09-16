@@ -7,6 +7,7 @@
     <link rel="preload" href="HanNomA.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="HanNomB.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="preload" href="SimSunExtG.ttf" as="font" type="font/ttf" crossorigin>
+	<link rel="preload" href="SimSunExtB.ttf" as="font" type="font/ttf" crossorigin>
     <style>
         @font-face {
             font-family: 'HanNomA';
@@ -19,6 +20,11 @@
 		@font-face {
 			font-family: 'SimSunExtG';
 			src: url('SimSunExtG.ttf') format('truetype');
+			font-display: swap;
+		}
+		@font-face {
+			font-family: 'SimSunExtB';
+			src: url('SimSunExtB.ttf') format('truetype');
 			font-display: swap;
 		}
 
@@ -163,7 +169,7 @@
         .original {
             display: inline;
             line-height: 1;
-            font-family: 'HanNomA', 'HanNomB', 'SimSunExtG', Arial, sans-serif; /* Áp dụng font Hán Nôm */
+            font-family: 'HanNomA', 'HanNomB', 'SimSunExtG', 'SimSunExtB', Arial, sans-serif; /* Áp dụng font Hán Nôm */
         }
         .nav-buttons {
             position: absolute;
