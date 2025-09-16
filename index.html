@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Học Tiếng Việt Với Từ Điển Hán-Nôm</title>
+    <style>
+        @font-face {
+            font-family: 'HanNomA';
+            src: url('HanNomA.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'HanNomB';
+            src: url('HanNomB.ttf') format('truetype');
+        }
+
+        :root {
+            --color1: #2a4d69;
+            --color2: #ffffff;
+            --color3: #162e5c;
+            --color4: #ffffff;
+            --color5: #000000;
+            --color6: #263c1a;
+            --color7: #000000;
+            --color8: #82cbf4;
+            --color9: #000000;
+            --color10: #698296;
+            --color11: #263c1a;
+            --color12: #000000;
+            --structure-bg: #ff9e07;
+            --structure-text: #000000;
+            --dependent-bg: #ffd89b;
+            --dependent-text: #162e5c;
+            --dependent-underline: #de5046;
+            font-size: 16px; /* Base cho rem */
+        }
+
+        body {
+            background-color: #000000;
+            font-family: Arial, 'Noto Sans SC', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: clamp(10px, 5vw, 20px);
+            -webkit-text-size-adjust: 100%; /* Tránh auto-scale trên iOS */
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: clamp(10px, 2vw, 20px);
+            width: 100%;
+            position: relative;
+            max-width: 100%;
+        }
+        .text-box {
+            width: clamp(300px, 95%, 800px);
+            max-width: 80ch; /* Giới hạn ký tự/dòng cho readability */
+            padding: clamp(10px, 3vw, 30px);
+            border: clamp(4px, 1vw, 10px) solid var(--color1);
+            border-radius: 0px;
+            background-color: var(--color4);
+            font-size: clamp(3rem, 6vmin, 4rem); /* Scale responsive cho Hán Nôm lớn */
+            color: var(--color3);
+            line-height: 2; /* Điều chỉnh cho CJK */
+            text-align: justify;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            position: relative;
+            transition: font-size 0.2s ease;
+        }
+        #textContent {
+            white-space: pre-wrap;
+            transition: font-size 0.2s ease;
+        }
+        .capture-btn {
+            position: absolute;
+            top: clamp(5px, 1vw, 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            padding: clamp(8px, 1.5vw, 10px) clamp(15px, 2vw, 20px);
+            font-size: clamp(1rem, 1.5vw, 1.5rem);
+            cursor: pointer;
+            background-color: #7289da;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+            z-index: 10;
+        }
+        .capture-btn:hover {
+            background-color: #99aab5;
+        }
+        .translated-word {
+            position: relative;
+            display: inline-block;
+            white-space: nowrap;
+            line-height: 1;
+            background-color: rgba(139,110,166, 0.4);
+            color: var(--color5);
+            padding: 0px 0px;
+        }
+        .pinyin-word {
+            position: relative;
+            display: inline-block;
+            white-space: nowrap;
+            line-height: 1.2;
+            padding: clamp(1px, 0.5vw, 2px) clamp(3px, 1vw, 5px);
+        }
+        .translation {
+            position: absolute;
+            bottom: clamp(100px, 8vw, 155px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(1.5rem, 2vw, 2rem); /* Scale với font chính */
+            background-color: rgba(139,110,166,0.2);
+            color: var(--color7);
+            padding: clamp(6px, 1vw, 9px);
+            border-radius: 7.5px;
+            white-space: nowrap;
+            z-index: 1;
+            line-height: 1;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+        }
+        .translation.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+        }
+        .pinyin {
+            position: absolute;
+            top: clamp(-30px, -3vw, -40px);
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: clamp(0.1rem, 0.1vmin, 0.1rem);
+            background-color: rgba(73,121,107,0.15);
+            color: var(--color12);
+            padding: clamp(2px, 0.5vw, 3px) clamp(3px, 0.8vw, 5px);
+            border-radius: 7.5px;
+            white-space: nowrap;
+            z-index: 1;
+            line-height: 1;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+        }
+        .pinyin.hidden {
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+        }
+        .original {
+            display: inline;
+            line-height: 1;
+            font-family: 'HanNomA', 'HanNomB', Arial, sans-serif; /* Áp dụng font Hán Nôm */
+        }
+        .nav-buttons {
+            position: absolute;
+            top: clamp(5px, 1vw, 10px);
+            left: clamp(10px, 2vw, 20px);
+            display: flex;
+            gap: clamp(5px, 1vw, 10px);
+            z-index: 10;
+        }
+        .nav-btn {
+            padding: clamp(6px, 1.5vw, 10px) clamp(12px, 2vw, 20px);
+            font-size: clamp(1rem, 1.2vw, 1.5rem);
+            cursor: pointer;
+            background-color: #7289da;
+            color: #ffffff;
+            border: none;
+            border-radius: 5px;
+        }
+        .nav-btn:hover {
+            background-color: #99aab5;
+        }
+        .nav-btn:disabled {
+            background-color: #4f545c;
+            cursor: not-allowed;
+        }
+        .structure-main {
+            background-color: var(--structure-bg);
+            border: 0px solid var(--structure-bg);
+            color: var(--structure-text);
+            padding: clamp(10px, 1.5vw, 17px);
+            border-radius: 3px;
+        }
+        .structure-dependent {
+            background-color: rgba(73,121,107,0.05);
+            color: var(--dependent-text);
+            text-decoration: none;
+            padding: clamp(5px, 1vw, 8px);
+            border-bottom: 0px solid var(--structure-bg);
+            border-top: 0px solid var(--dependent-bg);
+        }
+        .control-panel {
+            position: fixed;
+            bottom: clamp(10px, 2vw, 20px);
+            right: clamp(10px, 2vw, 20px);
+            background: rgba(25, 25, 25, 0.9);
+            padding: clamp(10px, 2vw, 15px);
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: clamp(3px, 0.5vw, 5px);
+        }
+        .control-panel button {
+            padding: clamp(4px, 1vw, 8px) clamp(6px, 1.5vw, 12px);
+            background: #ffffff;
+            color: black;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: clamp(0.8rem, 1vw, 1rem);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            .text-box {
+                width: 98%;
+                padding: clamp(8px, 2vw, 20px);
+                font-size: clamp(2.5rem, 5vmin, 3.5rem);
+            }
+            .control-panel {
+                bottom: 5px;
+                right: 5px;
+                left: 5px;
+                flex-direction: row;
+            }
+            .nav-buttons {
+                left: 5px;
+                top: 5px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .text-box {
+                padding: clamp(5px, 1.5vw, 10px);
+                font-size: clamp(2rem, 4vmin, 3rem);
+            }
+            .pinyin-word {
+                padding: 0.5px 1px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .text-box {
+                max-width: 900px;
+                font-size: clamp(4rem, 4vmin, 5rem);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-buttons">
+            <button class="nav-btn" id="prevBtn" disabled>Lùi</button>
+            <button class="nav-btn" id="nextBtn">Tiến</button>
+        </div>
+        <button class="capture-btn" id="captureBtn">Chụp</button>
+        <div class="text-box" id="textDisplay">
+            <div id="textContent"></div>
+        </div>
+    </div>
+
+    <div class="control-panel">
+        <button onclick="changeFontSize(10)">A+</button>
+        <button onclick="changeFontSize(-10)">A-</button>
+        <button onclick="togglePinyin()">Ẩn/Hiện Phiên Âm</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        const textDisplay = document.getElementById('textDisplay');
+        const textContent = document.getElementById('textContent');
+        const captureBtn = document.getElementById('captureBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        const horizontalPadding = 60;
+        const verticalPadding = 100;
+
+        function applyPadding() {
+            textContent.style.paddingLeft = `${horizontalPadding}px`;
+            textContent.style.paddingRight = `${horizontalPadding}px`;
+            textContent.style.paddingTop = `${verticalPadding}px`;
+            textContent.style.paddingBottom = `${verticalPadding}px`;
+        }
+
+        const textContentData = [`
+仍𠳒許𠬃悁
+裊𠄩些空悁𣈜𧘇、𣈜仍對腜𢭂僥空𠳒、時念𤴬拱㐌㵢歇𠫾過包𣎃𢆥英貝㛪。𣅶﨤僥𡥵心吶空𢧚𠳒、欺時間㵢如𩄲𢒎𧗱𡗶、吧英𨑻蹺𥋏𢠩尼抵耒懞𣈜些終對。英仕𢖵懞𠬠𠊛𱺵正㛪、仕𢖵傷實𡗉條𦄞𥿁、對眜𠸗群㷋𢞂、蹺𪽸時間㐌化散蹺瀾霜。𠄩些固𨑗塘𠁀𥆾𧡊僥、𥪝丿𣆰喭𢳆時英拯体𨀈𬧐、嘲㛪如𥪝𥋏𢠩、𥋏𢠩些得固僥。 
+裊𠄩些空悁𣈜𧘇、𣈜仍對腜𢭂僥空𠳒、時念𤴬拱㐌㵢歇𠫾過包𣎃𢆥英貝㛪。𣅶﨤僥𡥵心吶空𢧚𠳒、欺時間㵢如𩄲𢒎𧗱𡗶、吧英𨑻蹺𥋏𢠩尼抵耒懞𣈜些終對。英仕𢖵懞𠬠𠊛𱺵正㛪、仕𢖵傷實𡗉條𦄞𥿁。對眜𠸗群㷋𢞂、蹺𪽸時間㐌化散蹺瀾霜。𠄩些固𨑗塘𠁀𥆾𧡊僥、𥪝丿𣆰喭𢳆時英拯体𨀈𬧐、嘲㛪如𥪝𥋏𢠩。𥋏𢠩些得固僥。 
+𥅞𥋏𣅶欺𡗶𩄎、𡀯㤇傷咼𧗱遣英認𫥨、記憶迍迻𣈜𠸗、𡀯對些喭𢳆情期待䟻抵得𢮿吏𣆰丿頭 …
+英仕𢖵懞𠬠𠊛𱺵正㛪、仕𢖵傷實𡗉條𦄞𥿁。對眜𠸗群㷋𢞂、蹺𪽸時間㐌化散蹺瀾霜。𠄩些固𨑗塘𠁀𥆾𧡊僥、𥪝丿𣆰喭𢳆時英拯体𨀈𬧐、嘲㛪如𥪝𥋏𢠩、𥋏𢠩些得固僥。
+`];
+        const hanNomArray = [
+            "仍", "𠳒", "許", "𠬃", "悁", "裊", "𠄩", "些", "空", "悁", "𣈜", "𧘇", "𣈜", "仍", "對", "腜", "𢭂", "僥", "空", "𠳒", "時", "念", "𤴬", "拱", "㐌", "㵢", "歇", "𠫾", "過", "包", "𣎃", "𢆥", "英", "貝", "㛪", "𣅶", "﨤", "僥", "𡥵", "心", "吶", "空", "𢧚", "𠳒", "欺", "時", "間", "㵢", "如", "𩄲", "𢒎", "𧗱", "𡗶", "吧", "英", "𨑻", "蹺", "𥋏", "𢠩", "尼", "抵", "耒", "懞", "𣈜", "些", "終", "對", "英", "仕", "𢖵", "懞", "𠬠", "𠊛", "𱺵", "正", "㛪", "仕", "𢖵", "傷", "實", "𡗉", "條", "𦄞", "𥿁", "對", "眜", "𠸗", "群", "㷋", "𢞂", "蹺", "𪽸", "時", "間", "㐌", "化", "散", "蹺", "瀾", "霜", "𠄩", "些", "固", "𨑗", "塘", "𠁀", "𥆾", "𧡊", "僥", "𥪝", "丿", "𣆰", "喭", "𢳆", "時", "英", "拯", "体", "𨀈", "𬧐", "嘲", "㛪", "如", "𥪝", "𥋏", "𢠩", "𥋏", "𢠩", "些", "得", "固", "僥", "裊", "𠄩", "些", "空", "悁", "𣈜", "𧘇", "𣈜", "仍", "對", "腜", "𢭂", "僥", "空", "𠳒", "時", "念", "𤴬", "拱", "㐌", "㵢", "歇", "𠫾", "過", "包", "𣎃", "𢆥", "英", "貝", "㛪", "𣅶", "﨤", "僥", "𡥵", "心", "吶", "空", "𢧚", "𠳒", "欺", "時", "間", "㵢", "如", "𩄲", "𢒎", "𧗱", "𡗶", "吧", "英", "𨑻", "蹺", "𥋏", "𢠩", "尼", "抵", "耒", "懞", "𣈜", "些", "終", "對", "英", "仕", "𢖵", "懞", "𠬠", "𠊛", "𱺵", "正", "㛪", "仕", "𢖵", "傷", "實", "𡗉", "條", "𦄞", "𥿁", "對", "眜", "𠸗", "群", "㷋", "𢞂", "蹺", "𪽸", "時", "間", "㐌", "化", "散", "蹺", "瀾", "霜", "𠄩", "些", "固", "𨑗", "塘", "𠁀", "𥆾", "𧡊", "僥", "𥪝", "丿", "𣆰", "喭", "𢳆", "時", "英", "拯", "体", "𨀈", "𬧐", "嘲", "㛪", "如", "𥪝", "𥋏", "𢠩", "𥋏", "𢠩", "些", "得", "固", "僥", "𥅞", "𥋏", "𣅶", "欺", "𡗶", "𩄎", "𡀯", "㤇", "傷", "咼", "𧗱", "遣", "英", "認", "𫥨", "記", "憶", "迍", "迻", "𣈜", "𠸗", "𡀯", "對", "些", "喭", "𢳆", "情", "期", "待", "䟻", "抵", "得", "𢮿", "吏", "𣆰", "丿", "頭", "英", "仕", "𢖵", "懞", "𠬠", "𠊛", "𱺵", "正", "㛪", "仕", "𢖵", "傷", "實", "𡗉", "條", "𦄞", "𥿁", "對", "眜", "𠸗", "群", "㷋", "𢞂", "蹺", "𪽸", "時", "間", "㐌", "化", "散", "蹺", "瀾", "霜", "𠄩", "些", "固", "𨑗", "塘", "𠁀", "𥆾", "𧡊", "僥", "𥪝", "丿", "𣆰", "喭", "𢳆", "時", "英", "拯", "体", "𨀈", "𬧐", "嘲", "㛪", "如", "𥪝", "𥋏", "𢠩", "𥋏", "𢠩", "些", "得", "固", "僥"
+        ];const quocNguArray = [
+            "Những", "Lời", "Hứa", "Bỏ", "Quên", "Nếu", "hai", "ta", "không", "quên", "ngày", "ấy", "ngày", "những", "đôi", "môi", "trao", "nhau", "không", "lời", "thì", "niềm", "đau", "cũng", "đã", "trôi", "hết", "đi", "qua", "bao", "tháng", "năm", "anh", "với", "em", "Lúc", "gặp", "nhau", "con", "tim", "nói", "không", "nên", "lời", "khi", "thời", "gian", "trôi", "như", "mây", "bay", "về", "trời", "và", "anh", "đem", "theo", "giấc", "mơ", "này", "để", "rồi", "mong", "ngày", "ta", "chung", "đôi", "Anh", "sẽ", "nhớ", "mong", "một", "người", "là", "chính", "em", "sẽ", "nhớ", "thương", "thật", "nhiều", "điều", "vấn", "vương", "đôi", "mắt", "xưa", "còn", "đượm", "buồn", "theo", "vệt", "thời", "gian", "đã", "hóa", "tan", "theo", "làn", "sương", "Hai", "ta", "có", "trên", "đường", "đời", "nhìn", "thấy", "nhau", "trong", "phút", "giây", "nghẹn", "ngào", "thì", "anh", "chẳng", "thể", "bước", "tới", "chào", "em", "như", "trong", "giấc", "mơ", "giấc", "mơ", "ta", "được", "có", "nhau", "Nếu", "hai", "ta", "không", "quên", "ngày", "ấy", "Ngày", "những", "đôi", "môi", "trao", "nhau", "không", "lời", "thì", "niềm", "đau", "cũng", "đã", "trôi", "hết", "đi", "qua", "bao", "tháng", "năm", "anh", "với", "em", "Lúc", "gặp", "nhau", "con", "tim", "nói", "không", "nên", "lời", "khi", "thời", "gian", "trôi", "như", "mây", "bay", "về", "trời", "và", "anh", "đem", "theo", "giấc", "mơ", "này", "để", "rồi", "mong", "ngày", "ta", "chung", "đôi", "Anh", "sẽ", "nhớ", "mong", "một", "người", "là", "chính", "em", "sẽ", "nhớ", "thương", "thật", "nhiều", "điều", "vấn", "vương", "Đôi", "mắt", "xưa", "còn", "đượm", "buồn", "theo", "vệt", "thời", "gian", "đã", "hóa", "tan", "theo", "làn", "sương", "Hai", "ta", "có", "trên", "đường", "đời", "nhìn", "thấy", "nhau", "trong", "phút", "giây", "nghẹn", "ngào", "thì", "anh", "chẳng", "thể", "bước", "tới", "chào", "em", "như", "trong", "giấc", "mơ", "Giấc", "mơ", "ta", "được", "có", "nhau", "Thức", "giấc", "lúc", "khi", "trời", "mưa", "chuyện", "yêu", "thương", "ùa", "về", "khiến", "anh", "nhận", "ra", "kí", "ức", "đón", "đưa", "ngày", "xưa", "chuyện", "đôi", "ta", "nghẹn", "ngào", "tình", "cờ", "đợi", "chờ", "để", "được", "quay", "lại", "giây", "phút", "đầu", "Anh", "sẽ", "nhớ", "mong", "một", "người", "là", "chính", "em", "sẽ", "nhớ", "thương", "thật", "nhiều", "điều", "vấn", "vương", "Đôi", "mắt", "xưa", "còn", "đượm", "buồn", "theo", "vệt", "thời", "gian", "đã", "hóa", "tan", "theo", "làn", "sương", "Hai", "ta", "có", "trên", "đường", "đời", "nhìn", "thấy", "nhau", "trong", "phút", "giây", "nghẹn", "ngào", "thì", "anh", "chẳng", "thể", "bước", "tới", "chào", "em", "như", "trong", "giấc", "mơ", "giấc", "mơ", "ta", "được", "có", "nhau"
+        ];
+
+        const dictionary = {
+            "xxx": "xxx"
+        };
+
+        let currentSegmentIndex = 0;
+        let matchCount = 0; // Để debug số lượng khớp
+        let mismatchCount = 0;
+
+        // Hàm chuẩn hóa ký tự Unicode
+        function normalizeChar(char) {
+            return char.normalize('NFC');
+        }
+
+        // Lưu/truy xuất font size từ localStorage
+        function getStoredFontSize() {
+            return parseInt(localStorage.getItem('fontSize')) || 48; // Default ~3rem
+        }
+
+        // Thay đổi kích thước font
+        function changeFontSize(delta) {
+            let currentSize = parseInt(window.getComputedStyle(textContent).fontSize) || getStoredFontSize();
+            const newSize = Math.max(20, Math.min(120, currentSize + delta)); // Giới hạn 20-120px
+            textContent.style.fontSize = `${newSize}px`;
+            localStorage.setItem('fontSize', newSize);
+
+            // Scale tỷ lệ cho các elements khác
+            const rootSize = parseInt(getComputedStyle(document.documentElement).fontSize);
+            const scaleFactor = newSize / rootSize;
+            document.querySelectorAll('.pinyin, .translation').forEach(el => {
+                if (el.classList.contains('pinyin')) {
+                    el.style.fontSize = `${0.3 * scaleFactor}rem`;
+                } else {
+                    el.style.fontSize = `${0.3 * scaleFactor}rem`;
+                }
+            });
+        }
+
+        // Ẩn/hiện phiên âm (cải tiến: bao gồm .translation, kiểm tra tồn tại elements)
+        function togglePinyin() {
+            const pinyinElements = document.querySelectorAll('.pinyin, .translation');
+            if (pinyinElements.length === 0) {
+                console.warn('Không có elements .pinyin hoặc .translation để toggle!');
+                return;
+            }
+            const firstEl = pinyinElements[0];
+            const isHidden = firstEl.classList.contains('hidden');
+            console.log('Toggle pinyin: Current hidden state:', isHidden, 'Elements count:', pinyinElements.length);
+            pinyinElements.forEach(el => {
+                el.classList.toggle('hidden', !isHidden); // Toggle đúng logic: nếu hidden thì show, ngược lại
+            });
+            // Lưu trạng thái (true nếu visible sau toggle)
+            localStorage.setItem('pinyinVisible', !isHidden);
+        }
+
+        function getHanziStartIndex(segmentIndex) {
+            let hanziCount = 0;
+            for (let i = 0; i < segmentIndex; i++) {
+                const segment = textContentData[i];
+                for (let char of [...segment]) {
+                    if (/[\u3400-\u4DBF\u4E00-\u9FA5\uF900-\uFAFF\u{20000}-\u{2A6DF}\u{2A700}-\u{2B73F}\u{2B740}-\u{2B81F}\u{2B820}-\u{2CEAF}\u{2CEB0}-\u{2EBEF}\u{30000}-\u{3134F}\u{31350}-\u{323AF}\u{2F800}-\u{2FA1F}]/u.test(char)) {
+                        hanziCount++;
+                    }
+                }
+            }
+            return hanziCount;
+        }
+
+        function renderText(text, segmentIndex) {
+            let result = '';
+            let i = 0;
+            let hanziIndex = getHanziStartIndex(segmentIndex);
+            const sortedKeys = Object.keys(dictionary).sort((a, b) => b.length - a.length);
+            const chars = [...text];
+            matchCount = 0;
+            mismatchCount = 0;
+
+            while (i < chars.length) {
+                let matched = false;
+                let longestMatch = null;
+                let longestKey = '';
+
+                // Kiểm tra cụm từ trong từ điển
+                for (const key of sortedKeys) {
+                    const keyChars = [...key];
+                    if (i + keyChars.length <= chars.length && keyChars.every((c, idx) => c === chars[i + idx])) {
+                        if (!longestMatch || key.length > longestMatch.length) {
+                            longestMatch = key;
+                            longestKey = key;
+                        }
+                    }
+                }
+
+                if (longestMatch) {
+                    const translationText = dictionary[longestMatch].replace(/\n/g, '<br>');
+                    let wordHtml = '';
+                    for (let j = 0; j < longestKey.length; j++) {
+                        const char = longestKey[j];
+                        const normChar = normalizeChar(char);
+                        const normHanzi = hanziIndex < hanNomArray.length ? normalizeChar(hanNomArray[hanziIndex]) : null;
+                        if (/[\u3400-\u4DBF\u4E00-\u9FA5\uF900-\uFAFF\u{20000}-\u{2A6DF}\u{2A700}-\u{2B73F}\u{2B740}-\u{2B81F}\u{2B820}-\u{2CEAF}\u{2CEB0}-\u{2EBEF}\u{30000}-\u{3134F}\u{31350}-\u{323AF}\u{2F800}-\u{2FA1F}]/u.test(char) ) {
+                            if (normHanzi && normChar === normHanzi && hanziIndex < quocNguArray.length) {
+                                wordHtml += `<span class="pinyin-word"><span class="pinyin">${quocNguArray[hanziIndex]}</span><span class="original">${char}</span></span>`;
+                                matchCount++;
+                            } else {
+                                const codePoint = char.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+                                wordHtml += `<span class="pinyin-word"><span class="pinyin">U+${codePoint}</span><span class="original">${char}</span></span>`;
+                                mismatchCount++;
+                            }
+                            hanziIndex++; // Tăng index ngay cả khi mismatch để tránh lệch mảng
+                        } else {
+                            wordHtml += char;
+                        }
+                    }
+                    result += `<span class="translated-word"><span class="translation">${translationText}</span>${wordHtml}</span>`;
+                    i += longestKey.length;
+                    matched = true;
+                }
+
+                if (!matched) {
+                    const char = chars[i];
+                    const normChar = normalizeChar(char);
+                    const normHanzi = hanziIndex < hanNomArray.length ? normalizeChar(hanNomArray[hanziIndex]) : null;
+                    if (/[\u3400-\u4DBF\u4E00-\u9FA5\uF900-\uFAFF\u{20000}-\u{2A6DF}\u{2A700}-\u{2B73F}\u{2B740}-\u{2B81F}\u{2B820}-\u{2CEAF}\u{2CEB0}-\u{2EBEF}\u{30000}-\u{3134F}\u{31350}-\u{323AF}\u{2F800}-\u{2FA1F}]/u.test(char)) {
+                        if (normHanzi && normChar === normHanzi && hanziIndex < quocNguArray.length) {
+                            result += `<span class="pinyin-word"><span class="pinyin">${quocNguArray[hanziIndex]}</span><span class="original">${char}</span></span>`;
+                            matchCount++;
+                        } else {
+                            const codePoint = char.codePointAt(0).toString(16).toUpperCase().padStart(4, '0');
+                            result += `<span class="pinyin-word"><span class="pinyin">U+${codePoint}</span><span class="original">${char}</span></span>`;
+                            mismatchCount++;
+                        }
+                        hanziIndex++; // Tăng index để đồng bộ mảng
+                    } else {
+                        console.log(`Ký tự không phải Hán Nôm: ${char} (U+${char.codePointAt(0).toString(16).toUpperCase()})`);
+                        result += char;
+                    }
+                    i++;
+                }
+            }
+
+            // Xử lý cấu trúc ╠╣ và ┝┥ (giữ nguyên)
+            let processedContent = result.replace(/╠([^╣]*)╣/g, (match, innerContent) => {
+                let resultInner = '';
+                let iInner = 0;
+                const innerChars = [...innerContent];
+                while (iInner < innerChars.length) {
+                    if (innerChars[iInner] === '┝') {
+                        let j = iInner + 1;
+                        while (j < innerChars.length && innerChars[j] !== '┥') {
+                            j++;
+                        }
+                        if (innerChars[j] === '┥') {
+                            const mainText = innerChars.slice(iInner + 1, j).join('');
+                            resultInner += `<span class="structure-main">${mainText}</span>`;
+                            iInner = j + 1;
+                        } else {
+                            resultInner += innerChars[iInner];
+                            iInner++;
+                        }
+                    } else {
+                        let start = iInner;
+                        while (iInner < innerChars.length && innerChars[iInner] !== '┝') {
+                            iInner++;
+                        }
+                        const dependentText = innerChars.slice(start, iInner).join('');
+                        if (dependentText) {
+                            resultInner += `<span class="structure-dependent">${dependentText}</span>`;
+                        }
+                    }
+                }
+                return resultInner;
+            });
+
+            textContent.innerHTML = processedContent;
+            console.log('Render hoàn tất - Matches:', matchCount, 'Mismatches:', mismatchCount, 'Final hanziIndex:', hanziIndex);
+            if (mismatchCount > 0) {
+                console.warn('Có ký tự không khớp với hanNomArray. Kiểm tra Unicode hoặc cập nhật mảng.');
+            }
+        }
+
+        function updateNavigationButtons() {
+            prevBtn.disabled = currentSegmentIndex === 0;
+            nextBtn.disabled = currentSegmentIndex === textContentData.length - 1;
+        }
+
+        function initializeTextContent() {
+            renderText(textContentData[currentSegmentIndex], currentSegmentIndex);
+            applyPadding();
+            updateNavigationButtons();
+
+            // Khôi phục font size
+            const storedSize = getStoredFontSize();
+            textContent.style.fontSize = `${storedSize}px`;
+
+            // Scale các elements khác
+            const rootSize = parseInt(getComputedStyle(document.documentElement).fontSize);
+            const scaleFactor = storedSize / rootSize;
+            document.querySelectorAll('.pinyin, .translation').forEach(el => {
+                if (el.classList.contains('pinyin')) {
+                    el.style.fontSize = `${0.3 * scaleFactor}rem`;
+                } else {
+                    el.style.fontSize = `${0.3 * scaleFactor}rem`;
+                }
+            });
+
+            // Khôi phục trạng thái pinyin
+            const pinyinVisible = localStorage.getItem('pinyinVisible') !== 'false';
+            if (!pinyinVisible) {
+                document.querySelectorAll('.pinyin, .translation').forEach(el => el.classList.add('hidden'));
+            }
+            console.log('Khởi tạo - Pinyin visible:', pinyinVisible);
+        }
+
+        prevBtn.addEventListener('click', () => {
+            if (currentSegmentIndex > 0) {
+                currentSegmentIndex--;
+                renderText(textContentData[currentSegmentIndex], currentSegmentIndex);
+                applyPadding();
+                updateNavigationButtons();
+                // Re-apply hidden state sau render
+                const pinyinVisible = localStorage.getItem('pinyinVisible') !== 'false';
+                if (!pinyinVisible) {
+                    document.querySelectorAll('.pinyin, .translation').forEach(el => el.classList.add('hidden'));
+                }
+            }
+        });
+
+        nextBtn.addEventListener('click', () => {
+            if (currentSegmentIndex < textContentData.length - 1) {
+                currentSegmentIndex++;
+                renderText(textContentData[currentSegmentIndex], currentSegmentIndex);
+                applyPadding();
+                updateNavigationButtons();
+                // Re-apply hidden state sau render
+                const pinyinVisible = localStorage.getItem('pinyinVisible') !== 'false';
+                if (!pinyinVisible) {
+                    document.querySelectorAll('.pinyin, .translation').forEach(el => el.classList.add('hidden'));
+                }
+            }
+        });
+
+        captureBtn.addEventListener('click', () => {
+            html2canvas(textDisplay, {
+                scale: 2,
+                useCORS: true,
+                logging: false
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `text_content_segment_${currentSegmentIndex + 1}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        });
+
+        initializeTextContent();
+    </script>
+</body>
+</html>
